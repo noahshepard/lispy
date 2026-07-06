@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/Users/noahshepard/Projects/math/build",
+  "command": "/usr/bin/clang++  -I/Users/noahshepard/Projects/math/include -g -std=gnu++2b -o CMakeFiles/math.dir/src/main.cpp.o -c /Users/noahshepard/Projects/math/src/main.cpp",
+  "file": "/Users/noahshepard/Projects/math/src/main.cpp",
+  "output": "CMakeFiles/math.dir/src/main.cpp.o"
+}
+]
