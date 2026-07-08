@@ -18,7 +18,7 @@ class parser {
             return parse_atom();
         }
 
-        return {};
+        return {expr_type::SYMBOL, expr_value{value{error::bad_format, "Invalid Format: expected symbol or list"}}};
     }
 
    private:
@@ -29,9 +29,8 @@ class parser {
         if (tokens_[pos_++].type != token_type::L_PAREN) {
             std::cout << "no l paren!" << std::endl;
         }
-        expr e;
-        e.type = expr_type::LIST;
-        e.as = expr_list{};
+        expr e{expr_type::LIST, expr_list{}};
+
         auto& list = std::get<expr_list>(e.as);
 
         while (tokens_[pos_].type != token_type::R_PAREN) {
@@ -47,26 +46,18 @@ class parser {
 
     expr parse_atom() {
         token t = tokens_[pos_++];
-        expr e;
+        expr e{expr_type::SYMBOL, expr_value{value{error::inavlid_args, "Invalid Arguments: expected number or symbol"}}};
 
         int val;
         auto [ptr, ec] = std::from_chars(t.str.data(), t.str.data() + t.str.size(), val);
 
         if (ec == std::errc{} && ptr == t.str.data() + t.str.size()) {
-            e.type = expr_type::NUMBER;
-            e.as = expr_number{val};
+            e.type = expr_type::VALUE;
+            e.as = expr_value{value{val}};
         } else {
             e.type = expr_type::SYMBOL;
-            e.as = expr_symbol{lookup_symbol(t.str)};
+            e.as = expr_symbol{t.str};
         }
         return e;
-    }
-
-    symbol_type lookup_symbol(std::string_view symbol) {
-        if (symbol == "+") return symbol_type::PLUS;
-        if (symbol == "-") return symbol_type::MINUS;
-        if (symbol == "*") return symbol_type::TIMES;
-        if (symbol == "/") return symbol_type::DIVIDE;
-        return symbol_type::NULL_TYPE;
     }
 };

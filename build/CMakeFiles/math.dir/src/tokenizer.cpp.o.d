@@ -1,4 +1,5 @@
 CMakeFiles/math.dir/src/tokenizer.cpp.o: \
+  /Library/Developer/CommandLineTools/usr/lib/clang/17/share/asan_ignorelist.txt \
   /Users/noahshepard/Projects/math/src/tokenizer.cpp \
   /Users/noahshepard/Projects/math/include/tokenizer.hpp \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/regex \

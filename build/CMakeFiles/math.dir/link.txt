@@ -1,1 +1,1 @@
-/usr/bin/clang++ -g -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/math.dir/src/main.cpp.o CMakeFiles/math.dir/src/tokenizer.cpp.o -o math
+/usr/bin/clang++ -g -Wl,-search_paths_first -Wl,-headerpad_max_install_names -fsanitize=address,undefined CMakeFiles/math.dir/src/main.cpp.o CMakeFiles/math.dir/src/tokenizer.cpp.o CMakeFiles/math.dir/src/symbols.cpp.o CMakeFiles/math.dir/src/value.cpp.o -o math

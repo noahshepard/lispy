@@ -153,6 +153,30 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/math.dir/build.make CMakeFiles/math.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/symbols.o: src/symbols.cpp.o
+.PHONY : src/symbols.o
+
+# target to build an object file
+src/symbols.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/math.dir/build.make CMakeFiles/math.dir/src/symbols.cpp.o
+.PHONY : src/symbols.cpp.o
+
+src/symbols.i: src/symbols.cpp.i
+.PHONY : src/symbols.i
+
+# target to preprocess a source file
+src/symbols.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/math.dir/build.make CMakeFiles/math.dir/src/symbols.cpp.i
+.PHONY : src/symbols.cpp.i
+
+src/symbols.s: src/symbols.cpp.s
+.PHONY : src/symbols.s
+
+# target to generate assembly for a file
+src/symbols.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/math.dir/build.make CMakeFiles/math.dir/src/symbols.cpp.s
+.PHONY : src/symbols.cpp.s
+
 src/tokenizer.o: src/tokenizer.cpp.o
 .PHONY : src/tokenizer.o
 
@@ -177,6 +201,30 @@ src/tokenizer.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/math.dir/build.make CMakeFiles/math.dir/src/tokenizer.cpp.s
 .PHONY : src/tokenizer.cpp.s
 
+src/value.o: src/value.cpp.o
+.PHONY : src/value.o
+
+# target to build an object file
+src/value.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/math.dir/build.make CMakeFiles/math.dir/src/value.cpp.o
+.PHONY : src/value.cpp.o
+
+src/value.i: src/value.cpp.i
+.PHONY : src/value.i
+
+# target to preprocess a source file
+src/value.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/math.dir/build.make CMakeFiles/math.dir/src/value.cpp.i
+.PHONY : src/value.cpp.i
+
+src/value.s: src/value.cpp.s
+.PHONY : src/value.s
+
+# target to generate assembly for a file
+src/value.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/math.dir/build.make CMakeFiles/math.dir/src/value.cpp.s
+.PHONY : src/value.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -189,9 +237,15 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/symbols.o"
+	@echo "... src/symbols.i"
+	@echo "... src/symbols.s"
 	@echo "... src/tokenizer.o"
 	@echo "... src/tokenizer.i"
 	@echo "... src/tokenizer.s"
+	@echo "... src/value.o"
+	@echo "... src/value.i"
+	@echo "... src/value.s"
 .PHONY : help
 
 

@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/Users/noahshepard/Projects/math/include
 
-CXX_FLAGS = -g -std=gnu++2b
+CXX_FLAGS = -g -std=gnu++2b -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined
 
