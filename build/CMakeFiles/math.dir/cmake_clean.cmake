@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/math.dir/src/main.cpp.o"
   "CMakeFiles/math.dir/src/main.cpp.o.d"
+  "CMakeFiles/math.dir/src/tokenizer.cpp.o"
+  "CMakeFiles/math.dir/src/tokenizer.cpp.o.d"
   "math"
   "math.pdb"
 )

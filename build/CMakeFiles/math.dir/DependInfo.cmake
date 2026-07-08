@@ -9,6 +9,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/noahshepard/Projects/math/src/main.cpp" "CMakeFiles/math.dir/src/main.cpp.o" "gcc" "CMakeFiles/math.dir/src/main.cpp.o.d"
+  "/Users/noahshepard/Projects/math/src/tokenizer.cpp" "CMakeFiles/math.dir/src/tokenizer.cpp.o" "gcc" "CMakeFiles/math.dir/src/tokenizer.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

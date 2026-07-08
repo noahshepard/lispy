@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(math
     src/main.cpp
+    src/tokenizer.cpp
+    include/parser.hpp
 )
 target_include_directories(math
     PRIVATE

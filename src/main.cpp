@@ -2,126 +2,69 @@
 #include <expected>
 #include <iostream>
 #include <memory>
+#include <span>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "expression.hpp"
+#include "parser.hpp"
+#include "tokenizer.hpp"
 
-std::expected<std::unique_ptr<primative>, error> parse_primative(std::string_view token);
-std::expected<std::unique_ptr<binary>, error> parse_binary(std::string_view op_token, std::string_view arg1_token, std::string_view arg2_token);
-std::expected<std::unique_ptr<expression>, error> parse_expression(std::string_view token);
-
-std::expected<std::unique_ptr<primative>, error> parse_primative(std::string_view token) {
-    int res{};
-
-    auto [ptr, ec] = std::from_chars(token.data(), token.data() + token.size(), res);
-
-    if (ptr != token.data() + token.size()) {
-        return std::unexpected(error::bad_format);
+constexpr std::string symbol_to_string(symbol_type t) {
+    switch (t) {
+        case (symbol_type::PLUS):
+            return "+";
+        case (symbol_type::MINUS):
+            return "+";
+        case (symbol_type::TIMES):
+            return "+";
+        case (symbol_type::DIVIDE):
+            return "+";
+        default:
+            return "null symbol";
     }
-
-    if (ec != std::errc()) {
-        return std::unexpected(error::bad_format);
-    }
-
-    return std::make_unique<primative>(res);
 }
 
-std::expected<std::unique_ptr<binary>, error> parse_binary(std::string_view op_token, std::string_view arg1_token, std::string_view arg2_token) {
-    auto lres = parse_expression(arg1_token);
-    if (!lres) {
-        return std::unexpected(lres.error());
+constexpr std::string expr_to_string(expr e) {
+    switch (e.type) {
+        case (expr_type::NUMBER):
+            return std::to_string(std::get<expr_number>(e.as).number);
+        case (expr_type::SYMBOL):
+            return symbol_to_string(std::get<expr_symbol>(e.as).type);
+        case (expr_type::LIST): {
+            auto& list = std::get<expr_list>(e.as);
+            std::string ret = "(list: ";
+            for (const auto& le : list.elements) {
+                ret += expr_to_string(le);
+                ret += ", ";
+            }
+            ret += ")";
+            return ret;
+        }
+        default:
+            return "error: unknown type";
     }
-
-    auto rres = parse_expression(arg2_token);
-    if (!rres) {
-        return std::unexpected(rres.error());
-    }
-
-    binary_operation op{binary_operation::nullop};
-
-    if (op_token == "+") {
-        op = binary_operation::addition;
-    } else if (op_token == "-") {
-        op = binary_operation::subtraction;
-    } else if (op_token == "*") {
-        op = binary_operation::multiplication;
-    } else if (op_token == "/") {
-        op = binary_operation::division;
-    }
-
-    if (op == binary_operation::nullop) return std::unexpected(error::unsupported_expr);
-
-    return std::make_unique<binary>(op, std::move(lres.value()), std::move(rres.value()));
 }
 
-std::expected<std::unique_ptr<expression>, error> parse_expression(std::string_view token) {
-    if (token[0] != '(') {
-        return std::unexpected(error::bad_format);
-    }
-
-    std::size_t end = token.find_first_of(" ");
-    if (end == std::string_view::npos) {
-        return std::unexpected(error::bad_format);
-    }
-
-    std::string_view op_token = token.substr(1, end - 1);
-
-    if (std::isdigit(static_cast<unsigned char>(op_token[0]))) {
-        auto res = parse_primative(op_token);
-        if (!res) return std::unexpected(res.error());
-
-        // check that parens close
-
-        return std::unique_ptr<expression>(res.value().release());
-    }
-
-    // a better way to do this is find out how many terms there are before close paren!
-    std::cout << op_token << std::endl;
-
-    if (op_token == "+" || op_token == "-" || op_token == "*" || op_token == "/") {
-        std::size_t start = end;
-        end = token.find_first_of(" ", start);
-        if (end == std::string_view::npos) {
-            return std::unexpected(error::bad_format);
-        }
-        std::string_view arg1_token = token.substr(start, end);
-        std::cout << arg1_token << " len:" << arg1_token.length() << std::endl;
-
-        start = end;
-        end = token.find_first_of(" )", start);
-        if (end == std::string_view::npos) {
-            return std::unexpected(error::bad_format);
-        }
-        std::string_view arg2_token = token.substr(start, end);
-        std::cout << arg2_token << " len:" << arg2_token.length() << std::endl;
-
-        // check that parens close
-
-        auto res = parse_binary(op_token, arg1_token, arg2_token);
-        if (!res) return std::unexpected(res.error());
-
-        return std::unique_ptr<expression>(res.value().release());
-    }
-
-    return std::unexpected(error::unsupported_expr);
+std::ostream& operator<<(std::ostream& os, expr e) {
+    return os << expr_to_string(e);
 }
 
 int main() {
-    std::string ln{};
+    std::string raw_ln{};
 
-    while (std::getline(std::cin, ln)) {
-        auto eval = parse_expression(ln);
-        if (!eval) {
-            std::cout << eval.error() << std::endl;
-        } else {
-            auto val = eval.value()->eval();
-            if (!val) {
-                std::cout << val.error() << std::endl;
-            } else {
-                std::cout << "> " << val.value() << std::endl;
-            }
+    while (std::getline(std::cin, raw_ln)) {
+        std::vector<token> tokens = tokenize(raw_ln);
+
+        for (const token& t : tokens) {
+            std::cout << "type: " << t.type << " | src: " << t.str << std::endl;
         }
+
+        parser p{std::move(tokens)};
+        expr e = p.parse();
+
+        std::cout << "> " << e << std::endl;
     }
 
     return 0;
