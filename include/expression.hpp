@@ -4,6 +4,7 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <variant>
 
@@ -30,7 +31,7 @@ struct expr_list {
 };
 
 struct expr {
-    static std::unordered_map<std::string_view, std::function<value(std::vector<value>)>> lookup;
+    static std::unordered_map<std::string, value> lookup;
 
     expr_type type;
 
@@ -40,8 +41,13 @@ struct expr {
         switch (type) {
             case (expr_type::VALUE):
                 return std::get<expr_value>(as).val;
-            case (expr_type::SYMBOL):
-                return value{error::unsupported_expr, "Unsupported Expression: symbol without arguments"};
+            case (expr_type::SYMBOL): {
+                auto it = lookup.find(std::string(std::get<expr_symbol>(as).symbol));
+                if (it == lookup.end()) {
+                    return value{error::unsupported_expr, "Unsupported Expression: unrecognized symbol"};
+                }
+                return it->second;
+            }
             case (expr_type::LIST): {
                 std::vector<expr>& list = std::get<expr_list>(as).elements;
 
@@ -53,12 +59,24 @@ struct expr {
                     return value{error::unsupported_expr, "Unsupported Expression: first argument must be symbol"};
                 }
 
-                auto it = lookup.find(std::get<expr_symbol>(list[0].as).symbol);
-                if (it == lookup.end()) {
-                    return value{error::unsupported_expr, "Unsupported Expression: unreckonized symbol"};
+                std::string_view symbol = std::get<expr_symbol>(list[0].as).symbol;
+
+                if (symbol == "if") {
+                    return eval_if(list);
+                } else if (symbol == "define") {
+                    return eval_define(list);
                 }
 
-                std::function<value(std::vector<value>)> fn = it->second;
+                auto it = lookup.find(std::string(symbol));
+                if (it == lookup.end()) {
+                    return value{error::unsupported_expr, "Unsupported Expression: unrecognized symbol"};
+                }
+
+                if (it->second.type != value_type::function) {
+                    return value{error::inavlid_args, "Invalid Arguments: symbol does not evaluate to a function"};
+                }
+
+                std::function<value(std::vector<value>)> fn = std::get<function_v>(it->second.as).fn;
 
                 std::vector<value> args;
                 for (size_t i = 1; i < list.size(); i++) {
@@ -69,5 +87,37 @@ struct expr {
             default:
                 return value{error::unsupported_expr, "Unsupported Expression: invalid expression type"};
         }
+    }
+
+   private:
+    value eval_if(std::vector<expr> list) {
+        if (list.size() != 4) {
+            return value{error::inavlid_args, "Invalid Arguments: symbol 'if' requires 3 arguments"};
+        }
+        value cond = list[1].eval();
+
+        if (cond.type != value_type::boolean) {
+            return value{error::inavlid_args, "Invalid Arguments: first argument of 'if' must evaluate to a boolean"};
+        }
+
+        if (std::get<boolean_v>(cond.as).val) {
+            return list[2].eval();
+        }
+        return list[3].eval();
+    }
+
+    value eval_define(std::vector<expr> list) {
+        if (list.size() != 3) {
+            return value{error::inavlid_args, "Invalid Arguments: symbol 'define' requires 2 arguments"};
+        }
+
+        if (list[1].type != expr_type::SYMBOL) {
+            return value{error::inavlid_args, "Invalid Arguments: first arguments of 'define' must be a symbol"};
+        }
+        std::string_view symbol = std::get<expr_symbol>(list[1].as).symbol;
+
+        value val = list[2].eval();
+        lookup.emplace(std::string(symbol), val);
+        return val;
     }
 };

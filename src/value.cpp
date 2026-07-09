@@ -9,7 +9,7 @@ std::string value_to_string(value v) {
         case (value_type::symbol):
             return std::string(std::get<symbol_v>(v.as).str);
         case (value_type::function):
-            return "function";
+            return "[function]";
         case (value_type::boolean):
             return std::get<boolean_v>(v.as).val ? "true" : "false";
         case (value_type::error):

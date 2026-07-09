@@ -37,7 +37,7 @@ std::ostream& operator<<(std::ostream& os, expr e) {
     return os << expr_to_string(e);
 }
 
-std::unordered_map<std::string_view, std::function<value(std::vector<value>)>> expr::lookup;
+std::unordered_map<std::string, value> expr::lookup;
 
 int main() {
     expr::lookup = init_symbols();
@@ -54,7 +54,10 @@ int main() {
         expr e = p.parse();
 
         std::cout << "> " << e.eval() << std::endl;
-    }
 
+        // for (const auto& pair : expr::lookup) {
+        //     std::cout << "key: " << pair.first << " value: " << pair.second << std::endl;
+        // }
+    }
     return 0;
 }
