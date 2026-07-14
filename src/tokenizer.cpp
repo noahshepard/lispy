@@ -55,6 +55,7 @@ std::vector<token> tokenize(const std::string& src) {
         }
         if (!matched) {
             std::cout << "Unexpected char at pos: " << std::to_string(pos) << ";" << src[pos] << std::endl;
+            ++pos;
         }
     }
     tokens.emplace_back(token_type::END, "");

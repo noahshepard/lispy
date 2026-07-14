@@ -1,9 +1,11 @@
 #include "symbols.hpp"
 
+#include "environment.hpp"
 #include "expression.hpp"
 #include "value.hpp"
 
-value addition(std::vector<value> args) {
+value addition(const std::vector<value>& args, const std::shared_ptr<environment> lookup) {
+    (void)lookup;
     if (args.size() < 2) {
         return value{error::inavlid_args, "Invalid Arguments: symbol '+' must have >1 arguments"};
     }
@@ -21,7 +23,8 @@ value addition(std::vector<value> args) {
     return value{sum};
 }
 
-value substraction(std::vector<value> args) {
+value substraction(const std::vector<value>& args, const std::shared_ptr<environment> lookup) {
+    (void)lookup;
     if (args.size() == 0) {
         return value{error::inavlid_args, "Invalid Arguments: symbol '-' must have >0 arguments"};
     }
@@ -47,7 +50,8 @@ value substraction(std::vector<value> args) {
     return value{diff};
 }
 
-value multiplication(std::vector<value> args) {
+value multiplication(const std::vector<value>& args, const std::shared_ptr<environment> lookup) {
+    (void)lookup;
     if (args.size() < 2) {
         return value{error::inavlid_args, "Invalid Arguments: symbol '*' must have >1 arguments"};
     }
@@ -65,7 +69,8 @@ value multiplication(std::vector<value> args) {
     return value{product};
 }
 
-value division(std::vector<value> args) {
+value division(const std::vector<value>& args, const std::shared_ptr<environment> lookup) {
+    (void)lookup;
     if (args.size() < 2) {
         return value{error::inavlid_args, "Invalid Arguments: symbol '/' must have >1 arguments"};
     }
@@ -89,7 +94,8 @@ value division(std::vector<value> args) {
     return value{dividend};
 }
 
-value greater_than(std::vector<value> args) {
+value greater_than(const std::vector<value>& args, const std::shared_ptr<environment> lookup) {
+    (void)lookup;
     if (args.size() != 2) {
         return value{error::inavlid_args, "Invalid Arguments: symbol '>' reqires 2 arguments"};
     }
@@ -102,21 +108,66 @@ value greater_than(std::vector<value> args) {
     return value{a > b};
 }
 
-std::unordered_map<std::string, value> init_symbols() {
-    std::unordered_map<std::string, value> lookup;
+value equal_to(const std::vector<value>& args, const std::shared_ptr<environment> lookup) {
+    (void)lookup;
+    if (args.size() < 2) {
+        return value{error::inavlid_args, "Invalid Arguments: symbol '=' requires >1 arguments"};
+    }
 
-    lookup.emplace("+", value{std::function<value(std::vector<value>)>(addition)});
+    for (size_t i = 1; i < args.size(); i++) {
+        if (args[i].type != args[i - 1].type) {
+            return value{false};
+        }
 
-    lookup.emplace("-", value{std::function<value(std::vector<value>)>(substraction)});
+        value_type t = args[i].type;
 
-    lookup.emplace("*", value{std::function<value(std::vector<value>)>(multiplication)});
+        switch (t) {
+            case value_type::boolean:
+                if (std::get<boolean_v>(args[i].as).val != std::get<boolean_v>(args[i - 1].as).val) {
+                    return value{false};
+                }
+                break;
+            case value_type::error:
+                if (std::get<error_v>(args[i].as).err != std::get<error_v>(args[i - 1].as).err) {
+                    return value{false};
+                }
+                break;
+            case value_type::function:
+                return value{false};
+            case value_type::number:
+                if (std::get<number_v>(args[i].as).num != std::get<number_v>(args[i - 1].as).num) {
+                    return value{false};
+                }
+                break;
+            case value_type::symbol:
+                if (std::get<symbol_v>(args[i].as).str != std::get<symbol_v>(args[i - 1].as).str) {
+                    return value{false};
+                }
+                break;
+            default:
+                return value{false};
+        }
+    }
+    return value{true};
+}
 
-    lookup.emplace("/", value{std::function<value(std::vector<value>)>(division)});
+std::shared_ptr<environment> init_symbols() {
+    std::shared_ptr<environment> lookup = std::make_shared<environment>();
 
-    lookup.emplace(">", value{std::function<value(std::vector<value>)>(greater_than)});
+    lookup->emplace("+", value{std::function<value(std::vector<value>&, std::shared_ptr<environment>)>(addition)});
 
-    lookup.emplace("true", value{true});
-    lookup.emplace("false", value{false});
+    lookup->emplace("-", value{std::function<value(std::vector<value>&, std::shared_ptr<environment>)>(substraction)});
+
+    lookup->emplace("*", value{std::function<value(std::vector<value>&, std::shared_ptr<environment>)>(multiplication)});
+
+    lookup->emplace("/", value{std::function<value(std::vector<value>&, std::shared_ptr<environment>)>(division)});
+
+    lookup->emplace(">", value{std::function<value(std::vector<value>&, std::shared_ptr<environment>)>(greater_than)});
+
+    lookup->emplace("true", value{true});
+    lookup->emplace("false", value{false});
+
+    lookup->emplace("=", value{std::function<value(std::vector<value>&, std::shared_ptr<environment>)>(equal_to)});
 
     return lookup;
 }

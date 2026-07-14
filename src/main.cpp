@@ -7,6 +7,7 @@
 #include <string_view>
 #include <vector>
 
+#include "environment.hpp"
 #include "expression.hpp"
 #include "parser.hpp"
 #include "symbols.hpp"
@@ -37,10 +38,8 @@ std::ostream& operator<<(std::ostream& os, expr e) {
     return os << expr_to_string(e);
 }
 
-std::unordered_map<std::string, value> expr::lookup;
-
 int main() {
-    expr::lookup = init_symbols();
+    std::shared_ptr<environment> lookup = init_symbols();
     std::string raw_ln{};
 
     while (std::getline(std::cin, raw_ln)) {
@@ -53,11 +52,9 @@ int main() {
         parser p{std::move(tokens)};
         expr e = p.parse();
 
-        std::cout << "> " << e.eval() << std::endl;
+        std::cout << "> " << e.eval(lookup) << std::endl;
 
-        // for (const auto& pair : expr::lookup) {
-        //     std::cout << "key: " << pair.first << " value: " << pair.second << std::endl;
-        // }
+        // lookup->print_envr();
     }
     return 0;
 }

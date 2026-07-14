@@ -10,6 +10,8 @@ class parser {
     explicit parser(std::vector<token> tokens) : pos_(0), tokens_(std::move(tokens)) {}
 
     expr parse() {
+        if (at_end()) return expr{expr_type::VALUE, expr_value{value{error::bad_format, "Bad Format!"}}};
+
         if (tokens_[pos_].type == token_type::L_PAREN) {
             return parse_list();
         }
@@ -18,12 +20,17 @@ class parser {
             return parse_atom();
         }
 
-        return {expr_type::SYMBOL, expr_value{value{error::bad_format, "Invalid Format: expected symbol or list"}}};
+        return {expr_type::VALUE, expr_value{value{error::bad_format, "Invalid Format: expected symbol or list"}}};
     }
 
    private:
     size_t pos_;
     std::vector<token> tokens_;
+
+    bool at_end() const {
+        return pos_ >= tokens_.size() ||
+               tokens_[pos_].type == token_type::END;
+    }
 
     expr parse_list() {
         if (tokens_[pos_++].type != token_type::L_PAREN) {
@@ -33,8 +40,15 @@ class parser {
 
         auto& list = std::get<expr_list>(e.as);
 
+        if (at_end()) {
+            return {expr_type::VALUE, expr_value{value{error::bad_format, "Invalid Format: expected symbol or list"}}};
+        }
+
         while (tokens_[pos_].type != token_type::R_PAREN) {
             list.elements.push_back(this->parse());
+            if (tokens_[pos_].type == token_type::END) {
+                return {expr_type::VALUE, expr_value{value{error::bad_format, "Invalid Format: unexpected end of expression"}}};
+            }
         }
 
         if (tokens_[pos_++].type != token_type::R_PAREN) {

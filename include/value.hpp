@@ -4,6 +4,8 @@
 #include <string>
 #include <variant>
 
+// #include "environment.hpp"
+
 enum class error {
     divide_by_zero,
     bad_eval,
@@ -11,6 +13,7 @@ enum class error {
     unsupported_expr,
     paren_miss,
     inavlid_args,
+    redefinition
 };
 
 enum class value_type {
@@ -23,12 +26,14 @@ enum class value_type {
 
 struct value;
 
+class environment;
+
 struct number_v {
     int num;
 };
 
 struct function_v {
-    std::function<value(std::vector<value>)> fn;
+    std::function<value(std::vector<value>&, std::shared_ptr<environment>)> fn;
 };
 
 struct symbol_v {
@@ -53,7 +58,7 @@ struct value {
     std::variant<number_v, function_v, symbol_v, boolean_v, error_v> as;
 
     explicit value(int num) : type(value_type::number), as(number_v{num}) {}
-    explicit value(std::function<value(std::vector<value>)> fn) : type(value_type::function), as(function_v{fn}) {}
+    explicit value(std::function<value(std::vector<value>&, std::shared_ptr<environment>)> fn) : type(value_type::function), as(function_v{fn}) {}
     explicit value(std::string_view str) : type(value_type::symbol), as(symbol_v{str}) {}
     explicit value(bool val) : type(value_type::boolean), as(boolean_v{val}) {}
     explicit value(error err) : type(value_type::error), as(error_v{err}) {}
