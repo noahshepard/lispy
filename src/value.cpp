@@ -14,8 +14,20 @@ std::string value_to_string(value v) {
             return std::get<boolean_v>(v.as).val ? "true" : "false";
         case (value_type::error):
             return std::string(std::get<error_v>(v.as).msg);
+        case (value_type::list): {
+            list_v l = std::get<list_v>(v.as);
+            std::string ret = "[";
+            while (!l.empty()) {
+                ret += value_to_string(l.head->car);
+                ret += ", ";
+                l = l.head->cdr;
+            }
+            ret += "]";
+            return ret;
+        }
     }
 }
+
 std::ostream& operator<<(std::ostream& os, value v) {
     return os << value_to_string(v);
 }

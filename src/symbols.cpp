@@ -151,6 +151,81 @@ value equal_to(const std::vector<value>& args, const std::shared_ptr<environment
     return value{true};
 }
 
+value cons(const std::vector<value>& args, const std::shared_ptr<environment> lookup) {
+    (void)lookup;
+
+    if (args.size() != 2) {
+        return value{error::inavlid_args, "Invalid Arguments: symbol 'cons' requires 2 arguments"};
+    }
+
+    value head = args[0];
+    value tail = args[1];
+
+    if (tail.type != value_type::list) {
+        return value{error::inavlid_args, "Invalid Arguments: symbol 'cons' requires second argument to be a list"};
+    }
+
+    list_v l = std::get<list_v>(tail.as);
+
+    if (!l.empty() && l.head->car.type != head.type) {
+        return value{error::inavlid_args, "Invalid Arguments: symbol 'cons' requires type of linked element to match type of list"};
+    }
+
+    return value{std::make_shared<cons_cell>(head, l)};
+}
+
+value car(const std::vector<value>& args, const std::shared_ptr<environment> lookup) {
+    (void)lookup;
+
+    if (args.size() != 1) {
+        return value{error::inavlid_args, "Invalid Arguments: symbol 'car' requires 1 arguments"};
+    }
+
+    if (args[0].type != value_type::list) {
+        return value{error::inavlid_args, "Invalid Arguments: symbol 'car' requires argument to be a list"};
+    }
+
+    list_v l = std::get<list_v>(args[0].as);
+
+    if (l.empty()) {
+        return value{error::unsupported_expr, "Unsupported Expression: cannot use symbol 'car' on an empty list"};
+    }
+
+    return l.head->car;
+}
+
+value cdr(const std::vector<value>& args, const std::shared_ptr<environment> lookup) {
+    (void)lookup;
+
+    if (args.size() != 1) {
+        return value{error::inavlid_args, "Invalid Arguments: symbol 'cdr' requires 1 arguments"};
+    }
+
+    if (args[0].type != value_type::list) {
+        return value{error::inavlid_args, "Invalid Arguments: symbol 'cdr' requires argument to be a list"};
+    }
+
+    list_v l = std::get<list_v>(args[0].as);
+
+    return value{l.head->cdr};
+}
+
+value empty(const std::vector<value>& args, const std::shared_ptr<environment> lookup) {
+    (void)lookup;
+
+    if (args.size() != 1) {
+        return value{error::inavlid_args, "Invalid Arguments: symbol 'empty?' requires 1 arguments"};
+    }
+
+    if (args[0].type != value_type::list) {
+        return value{error::inavlid_args, "Invalid Arguments: symbol 'empty?' requires argument to be a list"};
+    }
+
+    list_v l = std::get<list_v>(args[0].as);
+
+    return value{l.empty()};
+}
+
 std::shared_ptr<environment> init_symbols() {
     std::shared_ptr<environment> lookup = std::make_shared<environment>();
 
@@ -168,6 +243,13 @@ std::shared_ptr<environment> init_symbols() {
     lookup->emplace("false", value{false});
 
     lookup->emplace("=", value{std::function<value(std::vector<value>&, std::shared_ptr<environment>)>(equal_to)});
+
+    lookup->emplace("cons", value{std::function<value(std::vector<value>&, std::shared_ptr<environment>)>(cons)});
+    lookup->emplace("car", value{std::function<value(std::vector<value>&, std::shared_ptr<environment>)>(car)});
+    lookup->emplace("cdr", value{std::function<value(std::vector<value>&, std::shared_ptr<environment>)>(cdr)});
+    lookup->emplace("empty?", value{std::function<value(std::vector<value>&, std::shared_ptr<environment>)>(empty)});
+
+    lookup->emplace("nil", value{std::shared_ptr<cons_cell>(nullptr)});
 
     return lookup;
 }

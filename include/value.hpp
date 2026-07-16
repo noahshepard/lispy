@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <variant>
+#include <vector>
 
 // #include "environment.hpp"
 
@@ -13,7 +14,8 @@ enum class error {
     unsupported_expr,
     paren_miss,
     inavlid_args,
-    redefinition
+    redefinition,
+    no_error
 };
 
 enum class value_type {
@@ -21,11 +23,13 @@ enum class value_type {
     function,
     symbol,
     boolean,
+    list,
     error
 };
 
 struct value;
 
+struct cons_cell;
 class environment;
 
 struct number_v {
@@ -44,6 +48,12 @@ struct boolean_v {
     bool val;
 };
 
+struct list_v {
+    std::shared_ptr<cons_cell> head;
+
+    bool empty() const { return head == nullptr; }
+};
+
 struct error_v {
     error err;
     std::string_view msg;
@@ -55,7 +65,7 @@ struct error_v {
 struct value {
     value_type type;
 
-    std::variant<number_v, function_v, symbol_v, boolean_v, error_v> as;
+    std::variant<number_v, function_v, symbol_v, boolean_v, error_v, list_v> as;
 
     explicit value(int num) : type(value_type::number), as(number_v{num}) {}
     explicit value(std::function<value(std::vector<value>&, std::shared_ptr<environment>)> fn) : type(value_type::function), as(function_v{fn}) {}
@@ -63,6 +73,13 @@ struct value {
     explicit value(bool val) : type(value_type::boolean), as(boolean_v{val}) {}
     explicit value(error err) : type(value_type::error), as(error_v{err}) {}
     explicit value(error err, std::string_view msg) : type(value_type::error), as(error_v{err, msg}) {}
+    explicit value(std::shared_ptr<cons_cell> head) : type(value_type::list), as(list_v{head}) {}
+    explicit value(list_v l) : type(value_type::list), as(l) {}
+};
+
+struct cons_cell {
+    value car;
+    list_v cdr;
 };
 
 std::string value_to_string(value v);
