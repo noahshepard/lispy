@@ -1,5 +1,6 @@
 #include <charconv>
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include "expression.hpp"
@@ -70,7 +71,7 @@ class parser {
             e.as = expr_value{value{val}};
         } else {
             e.type = expr_type::SYMBOL;
-            e.as = expr_symbol{t.str};
+            e.as = expr_symbol{std::string(t.str)};
         }
         return e;
     }

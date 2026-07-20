@@ -56,10 +56,10 @@ struct list_v {
 
 struct error_v {
     error err;
-    std::string_view msg;
+    std::string msg;
 
     explicit error_v(error e) : err(e), msg("") {}
-    explicit error_v(error e, std::string_view m) : err(e), msg(m) {}
+    explicit error_v(error e, std::string m) : err(e), msg(m) {}
 };
 
 struct value {
@@ -72,7 +72,7 @@ struct value {
     explicit value(std::string_view str) : type(value_type::symbol), as(symbol_v{str}) {}
     explicit value(bool val) : type(value_type::boolean), as(boolean_v{val}) {}
     explicit value(error err) : type(value_type::error), as(error_v{err}) {}
-    explicit value(error err, std::string_view msg) : type(value_type::error), as(error_v{err, msg}) {}
+    explicit value(error err, std::string msg) : type(value_type::error), as(error_v{err, msg}) {}
     explicit value(std::shared_ptr<cons_cell> head) : type(value_type::list), as(list_v{head}) {}
     explicit value(list_v l) : type(value_type::list), as(l) {}
 };

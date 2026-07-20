@@ -42,7 +42,7 @@ class environment {
     value get(std::string key) const {
         auto search = lookup_.find(key);
         if (search == lookup_.end()) {
-            return (parent_ == nullptr) ? value{error::unsupported_expr, "Unsuported Expression: unknown symbol"} : parent_->get(key);
+            return (parent_ == nullptr) ? value{error::unsupported_expr, std::format("Unsuported Expression: unknown symbol '{}'", key)} : parent_->get(key);
         }
         return search->second;
     }

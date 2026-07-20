@@ -24,7 +24,7 @@ struct expr_value {
 };
 
 struct expr_symbol {
-    std::string_view symbol;
+    std::string symbol;
 };
 
 struct expr_list {
@@ -56,7 +56,9 @@ struct expr {
                     return value{error::unsupported_expr, "Unsupported Expression: first argument must be symbol"};
                 }
 
-                std::string_view symbol = std::get<expr_symbol>(list[0].as).symbol;
+                std::string symbol = std::get<expr_symbol>(list[0].as).symbol;
+
+                // std::cout << "symbol: " << symbol << std::endl;
 
                 if (symbol == "if") {
                     return eval_if(list, lookup);
@@ -66,11 +68,11 @@ struct expr {
                     return eval_lambda(list, lookup);
                 }
 
-                value symbol_val = lookup->get(std::string(symbol));
+                value symbol_val = lookup->get(symbol);
 
                 if (symbol_val.type != value_type::function) {
-                    std::cout << symbol_val << std::endl;
-                    return value{error::inavlid_args, "Invalid Arguments: symbol does not evaluate to a function"};
+                    // std::cout << symbol_val << std::endl;
+                    return value{error::inavlid_args, std::format("Invalid Arguments: symbol '{}' does not evaluate to a function", symbol)};
                 }
 
                 std::function<value(std::vector<value>&, std::shared_ptr<environment>)> fn = std::get<function_v>(symbol_val.as).fn;
